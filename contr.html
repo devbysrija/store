@@ -1,0 +1,38 @@
+ <!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>AngularJS Controller</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="myCtrl">
+
+    <h2>Student Details</h2>
+
+    <p>Name: {{name}}</p>
+    <p>Mark: {{mark}}</p>
+
+    <input ng-model="name" placeholder="Enter name">
+    <input type="number" ng-model="mark" placeholder="Enter mark">
+
+    <button ng-click="result()">Check Result</button>
+
+    <p>{{message}}</p>
+
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.controller('myCtrl', function($scope) {
+            $scope.name = "Srija";
+            $scope.mark = 80;
+
+            $scope.result = function() {
+                if ($scope.mark >= 50) {
+                    $scope.message = "Pass";
+                } else {
+                    $scope.message = "Fail";
+                }
+            };
+        });
+    </script>
+</body>
+</html>

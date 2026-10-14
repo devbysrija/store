@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html ng-app="studentApp">
+<head>
+    <title>Student Registration</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+
+<body ng-controller="StudentController">
+
+    <h2>Student Registration</h2>
+
+    <form ng-submit="save()">
+        <input ng-model="student.name" placeholder="Name" required>
+        <input ng-model="student.regno" placeholder="Register Number" required>
+        <input ng-model="student.department" placeholder="Department" required>
+        <input type="email" ng-model="student.email" placeholder="Email" required>
+
+        <button type="submit">{{ id ? 'Update' : 'Register' }}</button>
+        <button type="button" ng-click="clear()">Clear</button>
+    </form>
+
+    <h3>Student List</h3>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Name</th>
+            <th>Register Number</th>
+            <th>Department</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+
+        <tr ng-repeat="s in students">
+            <td>{{s.name}}</td>
+            <td>{{s.regno}}</td>
+            <td>{{s.department}}</td>
+            <td>{{s.email}}</td>
+            <td>
+                <button ng-click="edit(s)">Edit</button>
+                <button ng-click="remove(s._id)">Delete</button>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        var app = angular.module('studentApp', []);
+
+        app.controller('StudentController', function($scope, $http) {
+            $scope.student = {};
+            $scope.id = '';
+
+            $scope.load = function() {
+                $http.get('/students').then(function(res) {
+                    $scope.students = res.data;
+                });
+            };
+
+            $scope.save = function() {
+                if ($scope.id) {
+                    $http.put('/students/' + $scope.id, $scope.student)
+                    .then(function() {
+                        $scope.clear();
+                        $scope.load();
+                    });
+                } else {
+                    $http.post('/students', $scope.student)
+                    .then(function() {
+                        $scope.clear();
+                        $scope.load();
+                    });
+                }
+            };
+
+            $scope.edit = function(s) {
+                $scope.student = {
+                    name: s.name,
+                    regno: s.regno,
+                    department: s.department,
+                    email: s.email
+                };
+                $scope.id = s._id;
+            };
+
+            $scope.remove = function(id) {
+                $http.delete('/students/' + id).then(function() {
+                    $scope.load();
+                });
+            };
+
+            $scope.clear = function() {
+                $scope.student = {};
+                $scope.id = '';
+            };
+
+            $scope.load();
+        });
+    </script>
+
+</body>
+</html>
+<!-- 
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
+
+app.use(express.json());
+app.use(express.static('public'));
+
+mongoose.connect('mongodb://127.0.0.1:27017/studentdb');
+
+const Student = mongoose.model('Student', {
+    name: String,
+    regno: String,
+    department: String,
+    email: String
+});
+
+app.post('/students', async (req, res) => {
+    res.json(await Student.create(req.body));
+});
+
+app.get('/students', async (req, res) => {
+    res.json(await Student.find());
+});
+
+app.put('/students/:id', async (req, res) => {
+    res.json(await Student.findByIdAndUpdate(
+        req.params.id, req.body, { new: true }
+    ));
+});
+
+app.delete('/students/:id', async (req, res) => {
+    await Student.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted successfully' });
+});
+
+app.listen(3000, () => console.log('Server running on port 3000')); -->

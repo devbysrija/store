@@ -1,0 +1,50 @@
+ <!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>AngularJS Filters</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="myCtrl">
+
+    <h2>AngularJS Filters</h2>
+
+    <p>Uppercase: {{name | uppercase}}</p>
+    <p>Lowercase: {{name | lowercase}}</p>
+    <p>Currency: {{price | currency:'₹'}}</p>
+    <p>Number: {{price | number:2}}</p>
+    <p>Date: {{today | date:'dd-MM-yyyy'}}</p>
+    <p>Reverse: {{name | reverse}}</p>
+
+    <h3>Search Filter</h3>
+    <input ng-model="searchText" placeholder="Search student">
+
+    <h3>Student List</h3>
+    <ul>
+        <li ng-repeat="x in students | filter:searchText | orderBy:'name'">
+            {{x.name}} - {{x.mark}}
+        </li>
+    </ul>
+
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.controller('myCtrl', function($scope) {
+            $scope.name = "Srija";
+            $scope.price = 250;
+            $scope.today = new Date();
+
+            $scope.students = [
+                {name: "Ravi", mark: 80},
+                {name: "Anu", mark: 90},
+                {name: "Bala", mark: 70}
+            ];
+        });
+
+        app.filter('reverse', function() {
+            return function(text) {
+                return text.split('').reverse().join('');
+            };
+        });
+    </script>
+</body>
+</html>

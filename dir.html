@@ -1,0 +1,55 @@
+ <!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>AngularJS Directives</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="myCtrl">
+
+    <h2>AngularJS Directives</h2>
+
+    <p>ng-bind: <span ng-bind="name"></span></p>
+
+    <p>ng-model:</p>
+    <input ng-model="name">
+
+    <p>ng-if:</p>
+    <p ng-if="age >= 18">Eligible</p>
+
+    <p>ng-show:</p>
+    <p ng-show="visible">This is visible</p>
+
+    <p>ng-hide:</p>
+    <p ng-hide="visible">This is hidden</p>
+
+    <p>ng-repeat:</p>
+    <ul>
+        <li ng-repeat="x in items">{{x}}</li>
+    </ul>
+
+    <button ng-click="change()">Click Me</button>
+
+    <p>ng-class:</p>
+    <p ng-class="{'red': error}">CSS class example</p>
+
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.controller('myCtrl', function($scope) {
+            $scope.name = "Srija";
+            $scope.age = 20;
+            $scope.visible = true;
+            $scope.error = true;
+            $scope.items = ["Apple", "Mango", "Orange"];
+
+            $scope.change = function() {
+                $scope.name = "Welcome";
+            };
+        });
+    </script>
+
+    <style>
+        .red { color: red; }
+    </style>
+</body>
+</html>

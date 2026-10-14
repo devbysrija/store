@@ -1,0 +1,49 @@
+ <!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>AngularJS Services</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="myCtrl">
+
+    <h2>AngularJS Services</h2>
+
+    <p>{{message}}</p>
+
+    <button ng-click="getMessage()">Get Message</button>
+
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.service('MyService', function($http, $timeout, $interval, $filter) {
+            this.getMessage = function() {
+                return "Hello from Service";
+            };
+
+            this.getData = function() {
+                return $http.get('https://jsonplaceholder.typicode.com/users');
+            };
+
+            this.delay = function(callback) {
+                $timeout(callback, 1000);
+            };
+
+            this.repeat = function(callback) {
+                return $interval(callback, 2000);
+            };
+
+            this.upper = function(text) {
+                return $filter('uppercase')(text);
+            };
+        });
+
+        app.controller('myCtrl', function($scope, MyService) {
+            $scope.message = "Click the button";
+
+            $scope.getMessage = function() {
+                $scope.message = MyService.getMessage();
+            };
+        });
+    </script>
+</body>
+</html>

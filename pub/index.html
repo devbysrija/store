@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="en" ng-app="studentApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h2, h3 {
+            color: #234;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-input {
+            width: 100%;
+        }
+
+        button {
+            padding: 10px 14px;
+            margin: 4px 2px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #1769aa;
+            color: white;
+        }
+
+        .delete {
+            background: #d93636;
+        }
+
+        .edit {
+            background: #16834a;
+        }
+
+        .search {
+            background: #6546a5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #faf7f7;
+            padding: 10px;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        th {
+            background: #d0d5d9;
+            color: black;
+        }
+
+        .message {
+            margin: 12px 0;
+            color: #1769aa;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body ng-controller="StudentController">
+<div class="container">
+
+    <h2>Student Management System</h2>
+
+    <h3>{{ editingId ? 'Update Student' : 'Add Student' }}</h3>
+
+    <form ng-submit="saveStudent()">
+        <input class="form-input" ng-model="student.name"
+               placeholder="Student Name" required>
+
+        <input class="form-input" ng-model="student.department"
+               placeholder="Department" required>
+
+        <input class="form-input" type="number" ng-model="student.mark"
+               placeholder="Mark" min="0" max="100" required>
+
+        <button type="submit">
+            {{ editingId ? 'Update Student' : 'Add Student' }}
+        </button>
+
+        <button type="button" ng-click="resetForm()">Clear</button>
+    </form>
+
+    <h3>Get Student By ID</h3>
+
+    <div class="search-row">
+        <input ng-model="searchId" placeholder="Enter MongoDB Student ID">
+        <button class="search" ng-click="getStudentById()">Search</button>
+        <button ng-click="loadStudents()">Show All</button>
+    </div>
+
+    <p class="message">{{ message }}</p>
+
+    <h3>Student List</h3>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Mark</th>
+            <th>Actions</th>
+        </tr>
+
+        <tr ng-repeat="s in students track by s._id">
+            <td>{{ s.name }}</td>
+            <td>{{ s.department }}</td>
+            <td>{{ s.mark }}</td>
+            <td>
+                <button class="edit" ng-click="editStudent(s)">Edit</button>
+                <button class="delete" ng-click="deleteStudent(s._id)">Delete</button>
+            </td>
+        </tr>
+
+        <tr ng-if="students.length === 0">
+            <td colspan="4">No students found</td>
+        </tr>
+    </table>
+
+</div>
+
+<script>
+var app = angular.module('studentApp', []);
+
+app.controller('StudentController', function($scope, $http) {
+    $scope.student = {};
+    $scope.students = [];
+    $scope.editingId = null;
+    $scope.searchId = '';
+    $scope.message = '';
+
+    $scope.loadStudents = function() {
+        $http.get('/students').then(function(response) {
+            $scope.students = response.data;
+            $scope.message = '';
+        }, function() {
+            $scope.message = 'Unable to load students';
+        });
+    };
+
+    $scope.saveStudent = function() {
+        if ($scope.editingId) {
+            $http.put('/students/' + $scope.editingId, $scope.student)
+            .then(function() {
+                $scope.message = 'Student updated successfully';
+                $scope.resetForm();
+                $scope.loadStudents();
+            }, function(response) {
+                $scope.message = response.data.message || 'Update failed';
+            });
+        } else {
+            $http.post('/students', $scope.student)
+            .then(function() {
+                $scope.message = 'Student added successfully';
+                $scope.resetForm();
+                $scope.loadStudents();
+            }, function() {
+                $scope.message = 'Unable to add student';
+            });
+        }
+    };
+
+    $scope.getStudentById = function() {
+        if (!$scope.searchId) {
+            $scope.message = 'Enter a student ID';
+            return;
+        }
+
+        $http.get('/students/' + $scope.searchId)
+        .then(function(response) {
+            $scope.students = [response.data];
+            $scope.message = 'Student found';
+        }, function(response) {
+            $scope.students = [];
+            $scope.message = response.data.message || 'Student not found';
+        });
+    };
+
+    $scope.editStudent = function(s) {
+        $scope.student = {
+            name: s.name,
+            department: s.department,
+            mark: s.mark
+        };
+        $scope.editingId = s._id;
+        $scope.message = 'Edit the fields and click Update Student';
+    };
+
+    $scope.deleteStudent = function(id) {
+        if (confirm('Delete this student?')) {
+            $http.delete('/students/' + id)
+            .then(function() {
+                $scope.message = 'Student deleted successfully';
+                $scope.loadStudents();
+            }, function() {
+                $scope.message = 'Unable to delete student';
+            });
+        }
+    };
+
+    $scope.resetForm = function() {
+        $scope.student = {};
+        $scope.editingId = null;
+    };
+
+    $scope.loadStudents();
+});
+</script>
+
+</body>
+</html>
